@@ -10,7 +10,7 @@
     derived from it, never hand-edited.
   </description>
   <maintainer email="stefan.oanea@gmail.com">Stefan Oanea</maintainer>
-  <license>MIT</license>
+  <license>Proprietary</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

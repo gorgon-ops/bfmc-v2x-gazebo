@@ -20,7 +20,6 @@ setup(
     maintainer="Stefan Oanea",
     maintainer_email="stefan.oanea@gmail.com",
     description="ROS 2 nodes for the BFMC V2X localisation demonstration.",
-    license="MIT",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [

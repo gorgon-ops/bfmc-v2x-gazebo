@@ -9,7 +9,7 @@
     EKF, the behaviour arbiter, and the environment server that scores it.
   </description>
   <maintainer email="stefan.oanea@gmail.com">Stefan Oanea</maintainer>
-  <license>MIT</license>
+  <license>Proprietary</license>
 
   <depend>rclpy</depend>
   <depend>bfmc_v2x</depend>

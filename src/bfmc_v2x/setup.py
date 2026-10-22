@@ -15,6 +15,5 @@ setup(
     maintainer="Stefan Oanea",
     maintainer_email="stefan.oanea@gmail.com",
     description="V2X localisation and cooperative driving logic, free of ROS.",
-    license="MIT",
     tests_require=["pytest"],
 )

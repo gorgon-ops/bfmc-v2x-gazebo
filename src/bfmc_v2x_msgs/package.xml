@@ -9,7 +9,7 @@
     the diagnostics that let a run be judged after the fact.
   </description>
   <maintainer email="stefan.oanea@gmail.com">Stefan Oanea</maintainer>
-  <license>MIT</license>
+  <license>Proprietary</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>rosidl_default_generators</buildtool_depend>

@@ -10,7 +10,7 @@
     the filter and the right-of-way rules be tested in milliseconds.
   </description>
   <maintainer email="stefan.oanea@gmail.com">Stefan Oanea</maintainer>
-  <license>MIT</license>
+  <license>Proprietary</license>
 
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>python3-yaml</exec_depend>
