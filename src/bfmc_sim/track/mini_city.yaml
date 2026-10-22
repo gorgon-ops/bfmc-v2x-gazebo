@@ -1,0 +1,107 @@
+# The map. Everything else is generated from this file:
+#
+#   * the Gazebo world  (bfmc_sim/scripts/generate_world.py)
+#   * the driving routes and stop lines  (bfmc_v2x.track.Track)
+#   * the traffic light placements and their phase offsets
+#   * the environment server's ground truth
+#
+# Edit here, re-run the world generator, and every consumer stays in step.
+#
+# Units are metres, x east, y north. The layout is a 6 x 6 m ring road with
+# a cross through the middle, which gives one four-way signalled junction
+# (X) where the two vehicles' routes are guaranteed to conflict -- that
+# crossing is the whole point of the V2V half of the demo.
+#
+#         D-------------N-------------C        y = 5.4
+#         |             |             |
+#         |             |             |
+#         W-------------X-------------E        y = 3.0
+#         |             |             |
+#         |             |             |
+#         A-------------S-------------B        y = 0.6
+#
+#       x = 0.6       x = 3.0       x = 5.4
+
+name: mini_city
+
+# Carriageway width, and the width of one of its two lanes. Vehicles drive
+# on the right, so a route's drivable lane sits half a lane width right of
+# the centreline below.
+road_width: 0.74
+lane_width: 0.37
+
+# Extra space between the outermost road edge and the perimeter wall.
+bounds_margin: 0.60
+
+# How far back from the conflict zone the painted stop line sits. Without a
+# setback, a vehicle holding at the line has its nose on the junction
+# boundary and the smallest creep counts as entering.
+stop_line_setback: 0.12
+
+nodes:
+  A: [0.6, 0.6]   # south-west corner
+  B: [5.4, 0.6]   # south-east corner
+  C: [5.4, 5.4]   # north-east corner
+  D: [0.6, 5.4]   # north-west corner
+  S: [3.0, 0.6]   # south tee
+  E: [5.4, 3.0]   # east tee
+  N: [3.0, 5.4]   # north tee
+  W: [0.6, 3.0]   # west tee
+  X: [3.0, 3.0]   # central junction
+
+edges:
+  # Ring road.
+  - [A, S]
+  - [S, B]
+  - [B, E]
+  - [E, C]
+  - [C, N]
+  - [N, D]
+  - [D, W]
+  - [W, A]
+  # The cross.
+  - [S, X]
+  - [X, N]
+  - [W, X]
+  - [X, E]
+
+junctions:
+  # Only X is signalled. The four tees are unsignalled merges: a vehicle
+  # rounds them without stopping, which keeps the demo about the junction
+  # that matters. Adding a light to a tee is a four-line edit here.
+  X:
+    radius: 0.55
+    lights:
+      # North-south axis runs on the base phase plan...
+      - {id: 1, approach_from: S, offset_s: 0.0}
+      - {id: 2, approach_from: N, offset_s: 0.0}
+      # ...east-west runs the same plan nine seconds later, which is exactly
+      # the green-plus-yellow of the other axis.
+      - {id: 3, approach_from: W, offset_s: 9.0}
+      - {id: 4, approach_from: E, offset_s: 9.0}
+
+# Ground truth for the environment server. Each sits at the kerb of a road
+# the ego vehicle drives down, close enough to fall inside the detector's
+# 1.6 m range and 70 deg field of view without standing in the carriageway.
+obstacles:
+  - {id: 1, kind: STATIC_CAR,  x: 2.10, y: 0.12}   # parked, south road
+  - {id: 2, kind: PEDESTRIAN,  x: 3.35, y: 4.30}   # kerbside, north road
+  - {id: 3, kind: ROADBLOCK,   x: 1.55, y: 5.75}   # north road, westbound
+  - {id: 4, kind: STOP_SIGN,   x: 0.15, y: 2.60}   # west road, southbound
+  - {id: 5, kind: CROSSWALK,   x: 3.00, y: 4.10}   # painted, north road
+
+# Closed tours. Both cross X, from perpendicular approaches, which is what
+# forces the right-of-way negotiation.
+#
+# `spawn_s` is how far along the lane each car starts. Both stop lines sit
+# at arc 4.74 m, so spawning both at 1.0 m puts them an equal 3.74 m from
+# the junction -- they arrive together, which is the point.
+routes:
+  # Ego: anticlockwise outer half, straight north through the junction.
+  ego:
+    nodes: [A, S, X, N, D, W, A]
+    spawn_s: 1.0
+  # Peer: clockwise, straight west through the junction.
+  peer:
+    nodes: [B, E, X, W, A, S, B]
+    spawn_s: 1.0

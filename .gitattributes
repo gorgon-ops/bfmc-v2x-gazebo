@@ -1,0 +1,5 @@
+# The project is authored on Windows and run on Linux. Force LF so shell
+# scripts and Python entry points stay executable in the VM.
+* text=auto eol=lf
+*.png binary
+*.jpg binary

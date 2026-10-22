@@ -1,0 +1,173 @@
+# RViz layout for the demo.
+#
+# RViz is where the V2X state is actually legible: Gazebo shows two cars
+# driving, but only this view shows what each car *believes* -- its fused
+# pose against its dead-reckoned shadow, the traffic light it is obeying,
+# and which obstacle reports the environment server accepted.
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /Localisation1
+      Splitter Ratio: 0.5
+    Tree Height: 640
+  - Class: rviz_common/Views
+    Name: Views
+
+Visualization Manager:
+  Class: ""
+  Global Options:
+    Background Color: 38; 40; 46
+    Fixed Frame: map
+    Frame Rate: 30
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Cell Size: 0.5
+      Plane Cell Count: 20
+      Color: 70; 72; 80
+      Alpha: 0.35
+      Reference Frame: map
+
+    # ---------------------------------------------------------- the track
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Ego route
+      Enabled: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        Reliability Policy: Reliable
+        Value: /ego/route_markers
+
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Peer route
+      Enabled: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        Reliability Policy: Reliable
+        Value: /peer/route_markers
+
+    # ----------------------------------------------------------- the V2X
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Traffic lights
+      Enabled: true
+      Topic:
+        Depth: 10
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+        Value: /v2x/semaphore_markers
+
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Obstacles (ground truth)
+      Enabled: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        Reliability Policy: Reliable
+        Value: /environment/ground_truth
+
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Obstacle reports
+      Enabled: true
+      Topic:
+        Depth: 50
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+        Value: /environment/markers
+
+    # -------------------------------------------------------- the estimate
+    # Blue: what the ego car believes after fusing V2X.
+    - Class: rviz_default_plugins/PoseWithCovariance
+      Name: Localisation
+      Enabled: true
+      Color: 60; 140; 240
+      Alpha: 1
+      Shape: Arrow
+      Covariance:
+        Value: true
+        Position:
+          Alpha: 0.25
+          Color: 60; 140; 240
+          Scale: 1
+        Orientation:
+          Value: false
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+        Value: /ego/localization/pose
+
+    # Red: the same car on wheel odometry alone. The gap between the two
+    # arrows is the entire argument for the V2X link.
+    - Class: rviz_default_plugins/PoseWithCovariance
+      Name: Dead reckoning (ego)
+      Enabled: true
+      Color: 230; 80; 70
+      Alpha: 0.85
+      Shape: Arrow
+      Covariance:
+        Value: false
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+        Value: /ego/localization/dead_reckoned
+
+    - Class: rviz_default_plugins/PoseWithCovariance
+      Name: Localisation (peer)
+      Enabled: true
+      Color: 235; 140; 50
+      Alpha: 1
+      Shape: Arrow
+      Covariance:
+        Value: false
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Reliability Policy: Reliable
+        Value: /peer/localization/pose
+
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Enabled: false
+      Show Arrows: false
+      Show Axes: true
+      Show Names: false
+      Marker Scale: 0.2
+
+  Global Options_1: ~
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+      Line color: 128; 128; 0
+
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Name: Current View
+      # Looking down at the whole 6 x 6 m track from the south-west.
+      Distance: 11
+      Focal Point:
+        X: 3
+        Y: 3
+        Z: 0
+      Pitch: 1.05
+      Yaw: 0.9
+      Near Clip Distance: 0.01
+      Target Frame: map
+    Saved: ~
+
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 900
+  Width: 1500
+  Hide Left Dock: false
+  Hide Right Dock: true
+  QMainWindow State: ""

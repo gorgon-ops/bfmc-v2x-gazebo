@@ -1,0 +1,79 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # The core logic has no ROS or Gazebo dependency, so it is tested on a
+  # plain Python matrix. This is the job that catches real regressions.
+  core:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip numpy PyYAML pytest
+      - name: Test the V2X core
+        run: python -m pytest src/bfmc_v2x/test -q
+      - name: Test world generation
+        run: python -m pytest src/bfmc_sim/test -q
+      - name: The generated world must not be stale
+        run: python src/bfmc_sim/scripts/generate_world.py --check
+
+  # A full colcon build, so a broken package.xml or entry point is caught
+  # here rather than on the machine someone is trying to demo from.
+  workspace:
+    runs-on: ubuntu-24.04
+    container:
+      image: ros:jazzy-ros-base-noble
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ros-jazzy-ros-gz ros-jazzy-xacro ros-jazzy-robot-state-publisher \
+            ros-jazzy-tf2-ros python3-colcon-common-extensions \
+            python3-numpy python3-yaml python3-pytest
+      - name: Build
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --event-handlers console_direct+
+      - name: Every node must at least import
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source install/setup.bash
+          python3 - <<'PY'
+          import importlib
+          modules = [
+              "bfmc_v2x_ros.localization_server_node",
+              "bfmc_v2x_ros.semaphore_node",
+              "bfmc_v2x_ros.wheel_encoder_node",
+              "bfmc_v2x_ros.v2x_bridge_node",
+              "bfmc_v2x_ros.localization_node",
+              "bfmc_v2x_ros.driver_node",
+              "bfmc_v2x_ros.detector_node",
+              "bfmc_v2x_ros.environment_server_node",
+              "bfmc_v2x_ros.metrics_node",
+          ]
+          for name in modules:
+              importlib.import_module(name)
+              print("ok", name)
+          PY
+      - name: The vehicle description must expand
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source install/setup.bash
+          xacro src/bfmc_sim/urdf/vehicle.urdf.xacro name:=ego > /tmp/ego.urdf
+          python3 -c "import xml.etree.ElementTree as ET; ET.parse('/tmp/ego.urdf'); print('urdf ok')"

@@ -1,0 +1,38 @@
+# Two ways to run the demo.
+#
+#   docker compose run --rm test      # build + the full test suite, no GUI
+#   docker compose up sim             # headless simulation, metrics to stdout
+#   docker compose up gui             # with Gazebo and RViz on an X11 host
+services:
+  # The one that works everywhere, including CI.
+  test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: python3 -m pytest /ws/src/bfmc_v2x/test /ws/src/bfmc_sim/test -q
+
+  sim:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    # Headless: no render engine needed, so this runs on a server.
+    command: >
+      ros2 launch bfmc_v2x_ros demo.launch.py
+      headless:=true rviz:=false output_dir:=/ws/runs
+    volumes:
+      - ./runs:/ws/runs
+
+  # Needs an X server on the host. On Linux, run `xhost +local:docker` first.
+  # On Windows, use WSLg or an X server such as VcXsrv.
+  gui:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: ros2 launch bfmc_v2x_ros demo.launch.py output_dir:=/ws/runs
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - LIBGL_ALWAYS_SOFTWARE=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./runs:/ws/runs
